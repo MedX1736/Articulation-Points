@@ -1,43 +1,23 @@
-$matrixAdj = [];
+var $matrixAdj = []
 // on cree le tableau bleu, contenant les lignes
-$nbVertexes= 5;
-$vertexes=[];
-$nbCc=0;
+var $nbVertexes= 10;
+var $vertexes=[];
+var $nbCc=0;
+var $cy ;
 //$pointArticul=[];
-$Nodes=[];
-var $cy;
-$(document).ready(function(){
-  $('#nbNode').keypress(function (e) {
-   var key = e.which;
-   if(key == 13)  // the enter key code
-    {
-      $nbVertexes= i=$("#nbNode").val();
-      initMatrix();
-      createNodes();
-      initGraph();
-    }
-  });
-  $('#SecondNode').keypress(function (e) {
-   var key = e.which;
-   if(key == 13)  // the enter key code
-    {
-      var i,j;
-       i=$("#FirstNode").val();
-       j=$("#SecondNode").val();
-        $matrixAdj[i-1][j-1]=1;
-        $matrixAdj[j-1][i-1]=1;
-        updateEdges(i,j);
-    }
-  });
-  $("#valider").click(function(){
+// $Nodes=[];
+// var $cy;
+
+function  articulationSolve(cy,matrixAdj){
+    $matrixAdj = matrixAdj;
+    $cy = cy;
     initVertexes();
     $nbCc=NCC(-1);//Initial number of CC
-      articulationPoints();
-
-  });
-});
+    articulationPoints();
+  };
 function initMatrix(){
   var i,j;
+  const $matrixAdj = [];
  for(i = 0; i < $nbVertexes; i++){
      $matrixAdj[i] = [];
      for(j = 0; j < $nbVertexes; j++){
@@ -45,6 +25,7 @@ function initMatrix(){
         }
      }
  }
+ return $matrixAdj;
 }
 function initVertexes(){
   var i=0;
@@ -75,6 +56,7 @@ function DFS($vertex,$vertexNotV){
            }
          }
     }
+    // console.log($matrixAdj);
 }
 function NCC($vertexNotV){
    var nbCCtmp=0;
@@ -85,11 +67,13 @@ function NCC($vertexNotV){
         {
           DFS(i,$vertexNotV);
          nbCCtmp++;
+        //  console.log(`nbcctmp ${nbCCtmp}`);
        }
         return nbCCtmp;
 }
 function articulationPoints(){
   var i;
+  var selected = []
   var k=0;
   for (i=0;i<$vertexes.length;i++)
     {
@@ -98,54 +82,16 @@ function articulationPoints(){
       // if (tmpCC!=$nbCc)
       if (tmpCC>$nbCc)
          { //$pointArticul[k]=i+1;
-           console.log(i);
-           ColorArtPoit(i);//Color the articulation vertex
+           selected.push(i);
+           ColorArtPoint(i);//Color the articulation vertex
            k++;
          }
     }
+    console.log(selected);
 }
-function createNodes(){
-    $Nodes=[]; //Initialize Nodes Matrix
-    for (var i = 0; i<$nbVertexes; i++) {
-        $Nodes.push({
-            data: {
-                id: i+1,
-                name:i+1
-            }
-        });
-    }
+function ColorArtPoint($i){
+  $cy.nodes()[$i].css({
+  'background-color': '#27ae60'
+   });
 }
-function updateEdges(FirstNode,SecondNode){
-  $cy.add({
-    group: "edges",
-    data: {source:FirstNode,
-    target:SecondNode },
-});
-}
-function initGraph(){
-  var Style =  cytoscape.stylesheet().selector('node').css({
-    'background-color': '#f1982e',
-    'label': 'data(id)',
-    'color':'#ffffff'
-      }).selector('edge').css({
-        'width': 3,
-        'line-color': '#ccc',
-        'target-arrow-color': '#ccc',
-        'target-arrow-shape': 'triangle'
-      })
- $cy=cytoscape({
-   container: $('#graph-container'),
-    elements:{
-       nodes: $Nodes,
-    },
-    style:Style,
-    layout: {
-      name: 'random',
-    },
- });
-}
-function ColorArtPoit($i){
-    $cy.nodes()[$i].css({
-    'background-color': '#27ae60'
-     });
-}
+export {articulationSolve,initMatrix,} ;
